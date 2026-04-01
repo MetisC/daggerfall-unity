@@ -199,7 +199,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         {
             base.Update();
 
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            if (InputManager.Instance.GetSubmitButtonDown())
             {
                 ReturnPlayerInputEvent(this, textBox.Text);
             }

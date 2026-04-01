@@ -528,7 +528,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
             if (RegionSelected)
             {
-                if (locationFilterTextBox.HasFocus() && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+                if (locationFilterTextBox.HasFocus() && InputManager.Instance.GetSubmitButtonDown())
                     FindFromFilterText();
 
                 if (InputManager.Instance.GetMouseButtonUp(1))
@@ -538,7 +538,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     zoom = !zoom;
                     ZoomMapTextures();
                 }
-                else if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && zoom && NativePanel.MouseOverComponent)
+                else if (InputManager.Instance.GetShiftPressed() && zoom && NativePanel.MouseOverComponent)
                 {
                     // Scrolling while zoomed in
                     zoomPosition = currentMousePos;
@@ -558,7 +558,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             }
             else
             {
-                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                if (InputManager.Instance.GetSubmitButtonDown())
                 {
                     if (identifying)
                         OpenRegionPanel(GetPlayerRegion());

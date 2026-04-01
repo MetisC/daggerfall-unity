@@ -1077,6 +1077,37 @@ namespace DaggerfallWorkshop.Game
             return Input.GetKey(KeyCode.Escape) || (EnableController && GetKey(joystickUICache[3], false));
         }
 
+        public bool GetSubmitButtonDown()
+        {
+            return Input.GetKeyDown(KeyCode.Return) ||
+                Input.GetKeyDown(KeyCode.KeypadEnter) ||
+                (EnableController && GetKeyDown(joystickUICache[0], false));
+        }
+
+        public bool GetSubmitButtonUp()
+        {
+            return Input.GetKeyUp(KeyCode.Return) ||
+                Input.GetKeyUp(KeyCode.KeypadEnter) ||
+                (EnableController && GetKeyUp(joystickUICache[0], false));
+        }
+
+        public bool GetSubmitButton()
+        {
+            return Input.GetKey(KeyCode.Return) ||
+                Input.GetKey(KeyCode.KeypadEnter) ||
+                (EnableController && GetKey(joystickUICache[0], false));
+        }
+
+        public bool GetShiftPressed()
+        {
+            return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        }
+
+        public bool GetControlPressed()
+        {
+            return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        }
+
         public bool GetKey(KeyCode k, bool useSecondary = true)
         {
             if (heldKeyCounter == 0)
