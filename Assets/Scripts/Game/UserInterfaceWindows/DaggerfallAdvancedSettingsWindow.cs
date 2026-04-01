@@ -119,6 +119,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         Checkbox geographicBackgrounds;
         Checkbox dungeonExitWagonPrompt;
         Checkbox travelMapLocationsOutline;
+        Checkbox showRelevantQuestLocations;
+        Checkbox showFavoriteLocations;
+        Checkbox showTravelMapVirtualKeyboard;
 
         // Enhancements
         Checkbox modSystem;
@@ -311,6 +314,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             geographicBackgrounds = AddCheckbox(rightPanel, "geographicBackgrounds", DaggerfallUnity.Settings.EnableGeographicBackgrounds);
             dungeonExitWagonPrompt = AddCheckbox(rightPanel, "dungeonExitWagonPrompt", DaggerfallUnity.Settings.DungeonExitWagonPrompt);
             travelMapLocationsOutline = AddCheckbox(rightPanel, "travelMapLocationsOutline", DaggerfallUnity.Settings.TravelMapLocationsOutline);
+            showRelevantQuestLocations = AddCheckbox(rightPanel, "showRelevantQuestLocations", DaggerfallUnity.Settings.ShowRelevantQuestLocations);
+            showFavoriteLocations = AddCheckbox(rightPanel, "showFavoriteLocations", DaggerfallUnity.Settings.ShowFavoriteLocations);
+            showTravelMapVirtualKeyboard = AddCheckbox(rightPanel, "showTravelMapVirtualKeyboard", DaggerfallUnity.Settings.ShowTravelMapVirtualKeyboard);
         }
 
         private void Enhancements(Panel leftPanel, Panel rightPanel)
@@ -485,6 +491,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             DaggerfallUnity.Settings.GuildQuestListBox = guildQuestListBox.IsChecked;
             DaggerfallUnity.Settings.BowLeftHandWithSwitching = bowLeftHandWithSwitching.IsChecked;
             DaggerfallUnity.Settings.TravelMapLocationsOutline = travelMapLocationsOutline.IsChecked;
+            DaggerfallUnity.Settings.ShowRelevantQuestLocations = showRelevantQuestLocations.IsChecked;
+            DaggerfallUnity.Settings.ShowFavoriteLocations = showFavoriteLocations.IsChecked;
+            DaggerfallUnity.Settings.ShowTravelMapVirtualKeyboard = showTravelMapVirtualKeyboard.IsChecked;
 
             DaggerfallUnity.Settings.DungeonAmbientLightScale = dungeonAmbientLightScale.GetValue();
             DaggerfallUnity.Settings.NightAmbientLightScale = nightAmbientLightScale.GetValue();

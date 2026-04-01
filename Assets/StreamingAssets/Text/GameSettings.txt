@@ -94,6 +94,12 @@ dungeonExitWagonPrompt,                             Dungeon wagon access prompt
 dungeonExitWagonPromptInfo,                         Prompt for wagon access on dungeon exit. (Wagon is always accessible within 5m of exit)
 travelMapLocationsOutline,                          Outline regional map locations
 travelMapLocationsOutlineInfo,                      Draw an outline around locations on regional maps to improve visibility
+showRelevantQuestLocations,                         Show relevant locations
+showRelevantQuestLocationsInfo,                     Show a list of active quest locations in travel map
+showFavoriteLocations,                              Show favorite locations
+showFavoriteLocationsInfo,                          Show a favorite locations list in travel map
+showTravelMapVirtualKeyboard,                       Show travel map keyboard
+showTravelMapVirtualKeyboardInfo,                   Show a virtual keyboard above travel map filter field
 guildQuestListBox,                                  Guild quest player selection
 guildQuestListBoxInfo,                              Presents eligible guild quests in a list box
 bowLeftHandWithSwitching,                           Equip bows in left hand only

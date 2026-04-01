@@ -163,10 +163,27 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected readonly int maxMatchingResults = 1000;
         protected string distanceRegionName = null;
         protected IDistance distance;
+        protected const int maxCustomLocationEntries = 64;
+        protected const char favoriteLocationsSeparator = '|';
 
         // Populated with localized names whenever player searches or lists inside this region
         // Used to complete search and list on localized names over canonical names
         protected Dictionary<string, int> localizedMapNameLookup = new Dictionary<string, int>();
+        protected List<string> favoriteLocations = new List<string>();
+        protected List<string> relevantQuestLocations = new List<string>();
+
+        protected TextBox locationFilterTextBox = new TextBox();
+        protected Panel questLocationsPanel = new Panel();
+        protected ListBox questLocationsListBox = new ListBox();
+        protected VerticalScrollBar questLocationsScrollBar = new VerticalScrollBar();
+        protected Panel favoriteLocationsPanel = new Panel();
+        protected ListBox favoriteLocationsListBox = new ListBox();
+        protected VerticalScrollBar favoriteLocationsScrollBar = new VerticalScrollBar();
+        protected Button addCurrentFavoriteButton;
+        protected Button addFilterFavoriteButton;
+        protected Button removeFavoriteButton;
+        protected Panel keyboardPanel = new Panel();
+        protected List<Button> keyboardButtons = new List<Button>();
 
         #endregion
 
@@ -177,6 +194,111 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected bool HasMultipleMaps
         {
             get { return (selectedRegionMapNames.Length > 1) ? true : false; }
+        }
+
+        void SetupCustomSearchControls()
+        {
+            locationFilterTextBox.Position = new Vector2(3, 164);
+            locationFilterTextBox.Size = new Vector2(224, 10);
+            locationFilterTextBox.MaxCharacters = 32;
+            locationFilterTextBox.UseFocus = true;
+            locationFilterTextBox.TextColor = DaggerfallUI.DaggerfallDefaultTextColor;
+            locationFilterTextBox.BackgroundColor = new Color(0, 0, 0, 0.65f);
+            locationFilterTextBox.Outline.Enabled = true;
+            NativePanel.Components.Add(locationFilterTextBox);
+
+            SetupQuestLocationsPanel();
+            SetupFavoriteLocationsPanel();
+            SetupVirtualKeyboardPanel();
+        }
+
+        void SetupQuestLocationsPanel()
+        {
+            questLocationsPanel.Position = new Vector2(3, 92);
+            questLocationsPanel.Size = new Vector2(106, 70);
+            questLocationsPanel.BackgroundColor = new Color(0, 0, 0, 0.6f);
+            questLocationsPanel.Outline.Enabled = true;
+            questLocationsPanel.Enabled = false;
+            NativePanel.Components.Add(questLocationsPanel);
+
+            questLocationsListBox.Position = new Vector2(2, 2);
+            questLocationsListBox.Size = new Vector2(98, 60);
+            questLocationsListBox.RowsDisplayed = 6;
+            questLocationsListBox.OnMouseClick += QuestLocationsListBox_OnMouseClick;
+            questLocationsPanel.Components.Add(questLocationsListBox);
+
+            questLocationsScrollBar.Position = new Vector2(101, 2);
+            questLocationsScrollBar.Size = new Vector2(4, 60);
+            questLocationsScrollBar.OnScroll += QuestLocationsScrollBar_OnScroll;
+            questLocationsPanel.Components.Add(questLocationsScrollBar);
+        }
+
+        void SetupFavoriteLocationsPanel()
+        {
+            favoriteLocationsPanel.Position = new Vector2(112, 92);
+            favoriteLocationsPanel.Size = new Vector2(115, 70);
+            favoriteLocationsPanel.BackgroundColor = new Color(0, 0, 0, 0.6f);
+            favoriteLocationsPanel.Outline.Enabled = true;
+            favoriteLocationsPanel.Enabled = false;
+            NativePanel.Components.Add(favoriteLocationsPanel);
+
+            favoriteLocationsListBox.Position = new Vector2(2, 2);
+            favoriteLocationsListBox.Size = new Vector2(107, 49);
+            favoriteLocationsListBox.RowsDisplayed = 5;
+            favoriteLocationsListBox.OnMouseClick += FavoriteLocationsListBox_OnMouseClick;
+            favoriteLocationsPanel.Components.Add(favoriteLocationsListBox);
+
+            favoriteLocationsScrollBar.Position = new Vector2(110, 2);
+            favoriteLocationsScrollBar.Size = new Vector2(4, 49);
+            favoriteLocationsScrollBar.OnScroll += FavoriteLocationsScrollBar_OnScroll;
+            favoriteLocationsPanel.Components.Add(favoriteLocationsScrollBar);
+
+            addCurrentFavoriteButton = DaggerfallUI.AddButton(new Rect(2, 54, 36, 14), favoriteLocationsPanel);
+            addCurrentFavoriteButton.Label.Text = "+ actual";
+            addCurrentFavoriteButton.Label.TextScale = 0.5f;
+            addCurrentFavoriteButton.OnMouseClick += AddCurrentFavoriteButton_OnMouseClick;
+
+            addFilterFavoriteButton = DaggerfallUI.AddButton(new Rect(40, 54, 19, 14), favoriteLocationsPanel);
+            addFilterFavoriteButton.Label.Text = "+";
+            addFilterFavoriteButton.OnMouseClick += AddFilterFavoriteButton_OnMouseClick;
+
+            removeFavoriteButton = DaggerfallUI.AddButton(new Rect(61, 54, 19, 14), favoriteLocationsPanel);
+            removeFavoriteButton.Label.Text = "-";
+            removeFavoriteButton.OnMouseClick += RemoveFavoriteButton_OnMouseClick;
+        }
+
+        void SetupVirtualKeyboardPanel()
+        {
+            keyboardPanel.Position = new Vector2(3, 52);
+            keyboardPanel.Size = new Vector2(224, 38);
+            keyboardPanel.BackgroundColor = new Color(0, 0, 0, 0.6f);
+            keyboardPanel.Outline.Enabled = true;
+            keyboardPanel.Enabled = false;
+            NativePanel.Components.Add(keyboardPanel);
+
+            string keyboardChars = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
+            const int keyWidth = 20;
+            const int keyHeight = 8;
+            const int keyPadding = 2;
+            int keysPerRow = 10;
+            for (int i = 0; i < keyboardChars.Length; i++)
+            {
+                int row = i / keysPerRow;
+                int col = i % keysPerRow;
+                Button keyButton = DaggerfallUI.AddButton(new Rect(2 + col * (keyWidth + keyPadding), 2 + row * (keyHeight + keyPadding), keyWidth, keyHeight), keyboardPanel);
+                keyButton.Label.Text = keyboardChars[i].ToString();
+                keyButton.Label.TextScale = 0.7f;
+                keyButton.Tag = keyboardChars[i].ToString();
+                keyButton.OnMouseClick += VirtualKeyboardButton_OnMouseClick;
+                keyboardButtons.Add(keyButton);
+            }
+
+            Button spaceButton = DaggerfallUI.AddButton(new Rect(2, 2 + 4 * (keyHeight + keyPadding), 218, keyHeight), keyboardPanel);
+            spaceButton.Label.Text = "[ ]";
+            spaceButton.Label.TextScale = 0.7f;
+            spaceButton.Tag = " ";
+            spaceButton.OnMouseClick += VirtualKeyboardButton_OnMouseClick;
+            keyboardButtons.Add(spaceButton);
         }
 
         protected bool HasVerticalMaps
@@ -286,7 +408,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             // Setup buttons for first time
             LoadButtonTextures();
             SetupButtons();
+            SetupCustomSearchControls();
             UpdateSearchButtons();
+            LoadFavoriteLocations();
+            RefreshCustomLocationPanels();
 
             // Region overlay panel
             regionTextureOverlayPanel = DaggerfallUI.AddPanel(regionTextureOverlayPanelRect, NativePanel);
@@ -358,6 +483,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 StartIdentify();
                 UpdateIdentifyTextureForPlayerRegion();
                 CloseRegionPanel();
+                RefreshCustomLocationPanels();
             }
 
         }
@@ -402,6 +528,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
             if (RegionSelected)
             {
+                if (locationFilterTextBox.HasFocus() && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+                    FindFromFilterText();
+
                 if (InputManager.Instance.GetMouseButtonUp(1))
                 {
                     // Zoom to mouse position
@@ -439,6 +568,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             // Show/hide identify panel when identify is running
             identifyOverlayPanel.Enabled = identifying && identifyState;
             AnimateIdentify();
+            UpdateCustomLocationPanels();
 
             // If a goto location specified, find it and ask if player wants to travel.
             if (gotoPlace != null)
@@ -917,6 +1047,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         // Handle clicks on the main panel
         protected virtual void ClickHandler(BaseScreenComponent sender, Vector2 position)
         {
+            if (locationFilterTextBox.MouseOverComponent ||
+                questLocationsPanel.MouseOverComponent ||
+                favoriteLocationsPanel.MouseOverComponent ||
+                keyboardPanel.MouseOverComponent)
+            {
+                return;
+            }
+
             position.y -= regionPanelOffset;
 
             // Ensure clicks are inside region texture
@@ -958,17 +1096,95 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         protected virtual void FindlocationButtonClickHandler(BaseScreenComponent sender, Vector2 position)
         {
-            // Open find location pop-up
-            if (RegionSelected)
+            if (!RegionSelected)
+                return;
+
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+            if (!string.IsNullOrWhiteSpace(locationFilterTextBox.ResultText))
             {
-                DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
-                DaggerfallInputMessageBox findPopUp = new DaggerfallInputMessageBox(uiManager, null, 31, TextManager.Instance.GetLocalizedText("findLocationPrompt"), true, this);
-                findPopUp.TextPanelDistanceY = 5;
-                findPopUp.TextBox.WidthOverride = 308;
-                findPopUp.TextBox.MaxCharacters = 32;
-                findPopUp.OnGotUserInput += HandleLocationFindEvent;
-                findPopUp.Show();
+                FindFromFilterText();
+                return;
             }
+
+            DaggerfallInputMessageBox findPopUp = new DaggerfallInputMessageBox(uiManager, null, 31, TextManager.Instance.GetLocalizedText("findLocationPrompt"), true, this);
+            findPopUp.TextPanelDistanceY = 5;
+            findPopUp.TextBox.WidthOverride = 308;
+            findPopUp.TextBox.MaxCharacters = 32;
+            findPopUp.OnGotUserInput += HandleLocationFindEvent;
+            findPopUp.Show();
+        }
+
+        void QuestLocationsScrollBar_OnScroll()
+        {
+            questLocationsListBox.ScrollIndex = questLocationsScrollBar.ScrollIndex;
+        }
+
+        void FavoriteLocationsScrollBar_OnScroll()
+        {
+            favoriteLocationsListBox.ScrollIndex = favoriteLocationsScrollBar.ScrollIndex;
+        }
+
+        void QuestLocationsListBox_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (string.IsNullOrWhiteSpace(questLocationsListBox.SelectedItem))
+                return;
+
+            locationFilterTextBox.Text = questLocationsListBox.SelectedItem;
+            locationFilterTextBox.SetFocus();
+        }
+
+        void FavoriteLocationsListBox_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (string.IsNullOrWhiteSpace(favoriteLocationsListBox.SelectedItem))
+                return;
+
+            locationFilterTextBox.Text = favoriteLocationsListBox.SelectedItem;
+            locationFilterTextBox.SetFocus();
+        }
+
+        void AddCurrentFavoriteButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (!GameManager.Instance.PlayerGPS.HasCurrentLocation)
+                return;
+
+            string locationName = TextManager.Instance.GetLocalizedLocationName(
+                GameManager.Instance.PlayerGPS.CurrentLocation.MapTableData.MapId,
+                GameManager.Instance.PlayerGPS.CurrentLocation.Name);
+            AddFavoriteLocation(locationName);
+        }
+
+        void AddFilterFavoriteButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (string.IsNullOrWhiteSpace(locationFilterTextBox.ResultText))
+            {
+                DaggerfallUI.MessageBox("Cannot add from filter: no text entered.");
+                return;
+            }
+
+            AddFavoriteLocation(locationFilterTextBox.ResultText);
+        }
+
+        void RemoveFavoriteButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (favoriteLocationsListBox.SelectedIndex < 0 || favoriteLocationsListBox.SelectedIndex >= favoriteLocations.Count)
+                return;
+
+            favoriteLocations.RemoveAt(favoriteLocationsListBox.SelectedIndex);
+            SaveFavoriteLocations();
+            RefreshFavoriteLocationsList();
+        }
+
+        void VirtualKeyboardButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            if (!RegionSelected)
+                return;
+
+            string value = sender.Tag as string;
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            locationFilterTextBox.Text += value;
+            locationFilterTextBox.SetFocus();
         }
 
         /// <summary>
@@ -1068,6 +1284,113 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         #region Private Methods
 
+        void UpdateCustomLocationPanels()
+        {
+            keyboardPanel.Enabled = RegionSelected && DaggerfallUnity.Settings.ShowTravelMapVirtualKeyboard;
+            questLocationsPanel.Enabled = RegionSelected && DaggerfallUnity.Settings.ShowRelevantQuestLocations;
+            favoriteLocationsPanel.Enabled = RegionSelected && DaggerfallUnity.Settings.ShowFavoriteLocations;
+
+            if (questLocationsPanel.Enabled)
+            {
+                questLocationsScrollBar.TotalUnits = questLocationsListBox.Count;
+                questLocationsScrollBar.DisplayUnits = questLocationsListBox.RowsDisplayed;
+                if (questLocationsScrollBar.DraggingThumb)
+                    questLocationsListBox.ScrollIndex = questLocationsScrollBar.ScrollIndex;
+                else
+                    questLocationsScrollBar.ScrollIndex = questLocationsListBox.ScrollIndex;
+            }
+
+            if (favoriteLocationsPanel.Enabled)
+            {
+                favoriteLocationsScrollBar.TotalUnits = favoriteLocationsListBox.Count;
+                favoriteLocationsScrollBar.DisplayUnits = favoriteLocationsListBox.RowsDisplayed;
+                if (favoriteLocationsScrollBar.DraggingThumb)
+                    favoriteLocationsListBox.ScrollIndex = favoriteLocationsScrollBar.ScrollIndex;
+                else
+                    favoriteLocationsScrollBar.ScrollIndex = favoriteLocationsListBox.ScrollIndex;
+            }
+        }
+
+        void RefreshCustomLocationPanels()
+        {
+            RefreshRelevantQuestLocations();
+            RefreshFavoriteLocationsList();
+            UpdateCustomLocationPanels();
+        }
+
+        void RefreshRelevantQuestLocations()
+        {
+            relevantQuestLocations.Clear();
+            questLocationsListBox.ClearItems();
+            SiteDetails[] sites = QuestMachine.Instance.GetAllActiveQuestSites();
+            foreach (SiteDetails site in sites)
+            {
+                string localizedName = TextManager.Instance.GetLocalizedLocationName(site.mapId, site.locationName);
+                if (!string.IsNullOrWhiteSpace(localizedName) && !relevantQuestLocations.Contains(localizedName))
+                    relevantQuestLocations.Add(localizedName);
+            }
+            relevantQuestLocations.Sort();
+            questLocationsListBox.AddItems(relevantQuestLocations);
+        }
+
+        void RefreshFavoriteLocationsList()
+        {
+            favoriteLocationsListBox.ClearItems();
+            favoriteLocationsListBox.AddItems(favoriteLocations);
+        }
+
+        void LoadFavoriteLocations()
+        {
+            favoriteLocations.Clear();
+            if (string.IsNullOrWhiteSpace(DaggerfallUnity.Settings.TravelMapFavoriteLocations))
+                return;
+
+            string[] entries = DaggerfallUnity.Settings.TravelMapFavoriteLocations.Split(favoriteLocationsSeparator);
+            foreach (string entry in entries)
+            {
+                if (!string.IsNullOrWhiteSpace(entry))
+                    favoriteLocations.Add(entry);
+            }
+        }
+
+        void SaveFavoriteLocations()
+        {
+            DaggerfallUnity.Settings.TravelMapFavoriteLocations = string.Join(favoriteLocationsSeparator.ToString(), favoriteLocations.ToArray());
+            DaggerfallUnity.Settings.SaveSettings();
+        }
+
+        void AddFavoriteLocation(string locationName)
+        {
+            if (string.IsNullOrWhiteSpace(locationName))
+            {
+                DaggerfallUI.MessageBox("Cannot add an empty location.");
+                return;
+            }
+
+            if (favoriteLocations.Contains(locationName))
+                return;
+
+            if (favoriteLocations.Count >= maxCustomLocationEntries)
+                return;
+
+            favoriteLocations.Add(locationName);
+            favoriteLocations.Sort();
+            SaveFavoriteLocations();
+            RefreshFavoriteLocationsList();
+        }
+
+        void FindFromFilterText()
+        {
+            if (!RegionSelected)
+                return;
+
+            string query = locationFilterTextBox.ResultText;
+            if (string.IsNullOrWhiteSpace(query))
+                return;
+
+            HandleLocationFindEvent(null, query);
+        }
+
         // Set selected region and open region panel
         protected virtual void OpenRegionPanel(int region)
         {
@@ -1092,6 +1415,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             SetupArrowButtons();
             UpdateMapTextures();
             UpdateBorder();
+            RefreshCustomLocationPanels();
             StartIdentify();
             UpdateCrosshair();
         }

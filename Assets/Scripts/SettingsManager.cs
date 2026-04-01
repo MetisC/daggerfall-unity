@@ -255,6 +255,10 @@ namespace DaggerfallWorkshop
         public bool EnableArrowCounter { get; set; }
         public bool DungeonExitWagonPrompt { get; set; }
         public bool TravelMapLocationsOutline { get; set; }
+        public bool ShowRelevantQuestLocations { get; set; }
+        public bool ShowFavoriteLocations { get; set; }
+        public bool ShowTravelMapVirtualKeyboard { get; set; }
+        public string TravelMapFavoriteLocations { get; set; }
         public bool IllegalRestWarning { get; set; }
         public bool LargeHUD { get; set; }
         public bool LargeHUDDocked { get; set; }
@@ -495,6 +499,10 @@ namespace DaggerfallWorkshop
             EnableArrowCounter = GetBool(sectionGUI, "EnableArrowCounter");
             DungeonExitWagonPrompt = GetBool(sectionGUI, "DungeonExitWagonPrompt");
             TravelMapLocationsOutline = GetBool(sectionGUI, "TravelMapLocationsOutline");
+            ShowRelevantQuestLocations = GetBool(sectionGUI, "ShowRelevantQuestLocations");
+            ShowFavoriteLocations = GetBool(sectionGUI, "ShowFavoriteLocations");
+            ShowTravelMapVirtualKeyboard = GetBool(sectionGUI, "ShowTravelMapVirtualKeyboard");
+            TravelMapFavoriteLocations = GetString(sectionGUI, "TravelMapFavoriteLocations");
             IllegalRestWarning = GetBool(sectionGUI, "IllegalRestWarning");
             LargeHUD = GetBool(sectionGUI, "LargeHUD");
             LargeHUDDocked = GetBool(sectionGUI, "LargeHUDDocked");
@@ -692,6 +700,10 @@ namespace DaggerfallWorkshop
             SetBool(sectionGUI, "EnableArrowCounter", EnableArrowCounter);
             SetBool(sectionGUI, "DungeonExitWagonPrompt", DungeonExitWagonPrompt);
             SetBool(sectionGUI, "TravelMapLocationsOutline", TravelMapLocationsOutline);
+            SetBool(sectionGUI, "ShowRelevantQuestLocations", ShowRelevantQuestLocations);
+            SetBool(sectionGUI, "ShowFavoriteLocations", ShowFavoriteLocations);
+            SetBool(sectionGUI, "ShowTravelMapVirtualKeyboard", ShowTravelMapVirtualKeyboard);
+            SetString(sectionGUI, "TravelMapFavoriteLocations", TravelMapFavoriteLocations);
             SetBool(sectionGUI, "IllegalRestWarning", IllegalRestWarning);
             SetBool(sectionGUI, "LargeHUD", LargeHUD);
             SetBool(sectionGUI, "LargeHUDDocked", LargeHUDDocked);
