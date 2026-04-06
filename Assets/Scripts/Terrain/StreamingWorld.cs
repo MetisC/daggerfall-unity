@@ -855,8 +855,9 @@ namespace DaggerfallWorkshop
         private void PlaceTerrain(int mapPixelX, int mapPixelY)
         {
             // Do nothing if out of range
-            if (mapPixelX < MapsFile.MinMapPixelX || mapPixelX >= MapsFile.MaxMapPixelX ||
-                mapPixelY < MapsFile.MinMapPixelY || mapPixelY >= MapsFile.MaxMapPixelY)
+            WorldDimensions dimensions = MapsFile.ActiveWorldDimensions;
+            if (mapPixelX < MapsFile.MinMapPixelX || mapPixelX >= dimensions.MapPixelWidth ||
+                mapPixelY < MapsFile.MinMapPixelY || mapPixelY >= dimensions.MapPixelHeight)
             {
                 return;
             }

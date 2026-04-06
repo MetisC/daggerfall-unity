@@ -106,7 +106,7 @@ namespace DaggerfallWorkshop
 
                 // Additional noise mask for small terrain features at ground level
                 int noisex = mapPixelX * (hDim - 1) + x;
-                int noisey = (MapsFile.MaxMapPixelY - mapPixelY) * (hDim - 1) + y;
+                int noisey = (MapsFile.ActiveWorldDimensions.MapPixelHeight - mapPixelY) * (hDim - 1) + y;
                 float lowFreq = TerrainHelper.GetNoise(noisex, noisey, 0.3f, 0.5f, 0.5f, 1);
                 float highFreq = TerrainHelper.GetNoise(noisex, noisey, 0.9f, 0.5f, 0.5f, 1);
                 scaledHeight += (lowFreq * highFreq) * extraNoiseScale;

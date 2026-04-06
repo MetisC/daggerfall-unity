@@ -53,7 +53,7 @@ namespace DaggerfallWorkshop
                 {
                     // It is important to use a continuous noise function to avoid gaps between tiles
                     int noisex = mapPixel.mapPixelX * (HeightmapDimension - 1) + x;
-                    int noisey = (MapsFile.MaxMapPixelY - mapPixel.mapPixelY) * (HeightmapDimension - 1) + y;
+                    int noisey = (MapsFile.ActiveWorldDimensions.MapPixelHeight - mapPixel.mapPixelY) * (HeightmapDimension - 1) + y;
                     float height = TerrainHelper.GetNoise(noisex, noisey, 0.01f, 0.5f, 0.1f, 2) * Scale;
                     mapPixel.heightmapSamples[y, x] = height;
 
