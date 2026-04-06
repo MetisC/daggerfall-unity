@@ -114,8 +114,9 @@ namespace DaggerfallWorkshop
             EditorGUI.DrawTextureTransparent(travelRect, travelMap, ScaleMode.StretchToFill);
 
             // Draw push pin
-            float percentX = (float)streamingWorld.MapPixelX / (float)MapsFile.MaxMapPixelX;
-            float percentY = (float)streamingWorld.MapPixelY / (float)MapsFile.MaxMapPixelY;
+            WorldDimensions dimensions = MapsFile.ActiveWorldDimensions;
+            float percentX = (float)streamingWorld.MapPixelX / (float)dimensions.MapPixelWidth;
+            float percentY = (float)streamingWorld.MapPixelY / (float)dimensions.MapPixelHeight;
             pushPinRect = new Rect(
                 travelRect.xMin + travelRect.width * percentX - pushPin.width / 2,
                 travelRect.yMin + travelRect.height * percentY - pushPin.height / 2,
@@ -138,8 +139,9 @@ namespace DaggerfallWorkshop
                 float percentY = clickY / travelRect.height;
 
                 // Convert to map pixel coordinates
-                int mapPixelX = (int)((float)MapsFile.MaxMapPixelX * percentX);
-                int mapPixelY = (int)((float)MapsFile.MaxMapPixelY * percentY);
+                WorldDimensions dimensions = MapsFile.ActiveWorldDimensions;
+                int mapPixelX = (int)((float)dimensions.MapPixelWidth * percentX);
+                int mapPixelY = (int)((float)dimensions.MapPixelHeight * percentY);
 
                 // Assign new coordinates to streaming world preview
                 streamingWorld.MapPixelX = mapPixelX;

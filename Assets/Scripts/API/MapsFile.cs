@@ -46,6 +46,12 @@ namespace DaggerfallConnect.Arena2
         public const int MaxMapPixelX = 1000;
         public const int MaxMapPixelY = 500;
 
+
+        /// <summary>
+        /// Gets active world dimensions.
+        /// </summary>
+        public static WorldDimensions ActiveWorldDimensions => WorldSettings.Dimensions;
+
         /// <summary>
         /// All region names.
         /// </summary>
@@ -334,9 +340,21 @@ namespace DaggerfallConnect.Arena2
             return NameHelper.BankTypes.Breton;
         }
 
+        private static int ClampMapPixelX(int mapPixelX)
+        {
+            WorldDimensions d = ActiveWorldDimensions;
+            return Math.Max(MinMapPixelX, Math.Min(mapPixelX, d.LastMapPixelX));
+        }
+
+        private static int ClampMapPixelY(int mapPixelY)
+        {
+            WorldDimensions d = ActiveWorldDimensions;
+            return Math.Max(MinMapPixelY, Math.Min(mapPixelY, d.LastMapPixelY));
+        }
+
         /// <summary>
         /// Converts longitude and latitude to map pixel coordinates.
-        /// The world is 1000x500 map pixels.
+        /// Uses active world dimensions from <see cref="WorldSettings"/>.
         /// </summary>
         /// <param name="longitude">Longitude position.</param>
         /// <param name="latitude">Latitude position.</param>
@@ -344,8 +362,9 @@ namespace DaggerfallConnect.Arena2
         public static DFPosition LongitudeLatitudeToMapPixel(int longitude, int latitude)
         {
             DFPosition pos = new DFPosition();
-            pos.X = longitude / 128;
-            pos.Y = 499 - (latitude / 128);
+            WorldDimensions d = ActiveWorldDimensions;
+            pos.X = ClampMapPixelX(longitude / WorldMapTileDim);
+            pos.Y = ClampMapPixelY(d.LastMapPixelY - (latitude / WorldMapTileDim));
 
             return pos;
         }
@@ -359,8 +378,11 @@ namespace DaggerfallConnect.Arena2
         public static DFPosition MapPixelToLongitudeLatitude(int mapPixelX, int mapPixelY)
         {
             DFPosition pos = new DFPosition();
-            pos.X = mapPixelX * 128;
-            pos.Y = (499 - mapPixelY) * 128;
+            WorldDimensions d = ActiveWorldDimensions;
+            mapPixelX = ClampMapPixelX(mapPixelX);
+            mapPixelY = ClampMapPixelY(mapPixelY);
+            pos.X = mapPixelX * WorldMapTileDim;
+            pos.Y = (d.LastMapPixelY - mapPixelY) * WorldMapTileDim;
 
             return pos;
         }
@@ -375,13 +397,13 @@ namespace DaggerfallConnect.Arena2
         /// <returns>Map pixel ID.</returns>
         public static int GetMapPixelID(int mapPixelX, int mapPixelY)
         {
-            return mapPixelY * 1000 + mapPixelX;
+            return mapPixelY * ActiveWorldDimensions.MapPixelWidth + mapPixelX;
         }
 
         public static DFPosition GetPixelFromPixelID(int pixelID)
         {
-            int x = pixelID % 1000;
-            int y = (pixelID - x) / 1000;
+            int x = pixelID % ActiveWorldDimensions.MapPixelWidth;
+            int y = (pixelID - x) / ActiveWorldDimensions.MapPixelWidth;
             return new DFPosition(x, y);
         }
 
@@ -397,7 +419,7 @@ namespace DaggerfallConnect.Arena2
         {
             DFPosition pos = LongitudeLatitudeToMapPixel(longitude, latitude);
 
-            return pos.Y * 1000 + pos.X;
+            return pos.Y * ActiveWorldDimensions.MapPixelWidth + pos.X;
         }
 
         /// <summary>
@@ -409,8 +431,11 @@ namespace DaggerfallConnect.Arena2
         public static DFPosition MapPixelToWorldCoord(int mapPixelX, int mapPixelY)
         {
             DFPosition pos = new DFPosition();
-            pos.X = mapPixelX * 32768;
-            pos.Y = (499 - mapPixelY) * 32768;
+            WorldDimensions d = ActiveWorldDimensions;
+            mapPixelX = ClampMapPixelX(mapPixelX);
+            mapPixelY = ClampMapPixelY(mapPixelY);
+            pos.X = mapPixelX * d.MapPixelToWorldUnitScale;
+            pos.Y = (d.LastMapPixelY - mapPixelY) * d.MapPixelToWorldUnitScale;
 
             return pos;
         }
@@ -424,8 +449,9 @@ namespace DaggerfallConnect.Arena2
         public static DFPosition WorldCoordToMapPixel(int worldX, int worldZ)
         {
             DFPosition pos = new DFPosition();
-            pos.X = worldX / 32768;
-            pos.Y = 499 - (worldZ / 32768);
+            WorldDimensions d = ActiveWorldDimensions;
+            pos.X = ClampMapPixelX(worldX / d.MapPixelToWorldUnitScale);
+            pos.Y = ClampMapPixelY(d.LastMapPixelY - (worldZ / d.MapPixelToWorldUnitScale));
 
             return pos;
         }
@@ -440,8 +466,9 @@ namespace DaggerfallConnect.Arena2
         {
             DFPosition mapPixel = WorldCoordToMapPixel(worldX, worldZ);
             DFPosition pos = new DFPosition();
-            pos.X = mapPixel.X * 128;
-            pos.Y = (499 - mapPixel.Y) * 128;
+            WorldDimensions d = ActiveWorldDimensions;
+            pos.X = mapPixel.X * WorldMapTileDim;
+            pos.Y = (d.LastMapPixelY - mapPixel.Y) * WorldMapTileDim;
 
             return pos;
         }
