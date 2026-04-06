@@ -25,6 +25,7 @@ using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Guilds;
 using DaggerfallWorkshop.Game.MagicAndEffects;
+using DaggerfallConnect.Arena2;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace DaggerfallWorkshop.Game
@@ -97,6 +98,7 @@ namespace DaggerfallWorkshop.Game
         GuildManager guildManager = null;
         QuestListsManager questListsManager = null;
         PostProcessVolume postProcessVolume = null;
+        WorldManager worldManager = new WorldManager();
 
         #endregion
 
@@ -115,6 +117,11 @@ namespace DaggerfallWorkshop.Game
         }
 
         public bool DisableAI { get; set; }
+
+        /// <summary>
+        /// Runtime world dataset and dimensions.
+        /// </summary>
+        public WorldManager WorldManager => worldManager;
 
         public StateManager StateManager
         {
@@ -470,6 +477,8 @@ namespace DaggerfallWorkshop.Game
                 Destroy(this);
                 return;
             }
+
+            worldManager.Boot(WorldBootstrap.CreateProvider(useTamrielDataset: false));
         }
 
         void Start()
